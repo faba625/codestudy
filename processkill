@@ -1,0 +1,57 @@
+using System;
+using System.Diagnostics;
+
+namespace ProcessMonitor
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Get the process name , threshold (in seconds) and frequency (in milliseconds) from user
+            Console.WriteLine("Process Name :")
+            string processName = Console.ReadLine() ;
+            Console.WriteLine("Threshold :")
+            int threshold = Console.ReadLine() ;
+            Console.WriteLine("Frequency :")
+            int frequency = Console.ReadLine() ;
+
+            while (true)
+            {
+                // Check if the process is running
+                Process[] processes = Process.GetProcessesByName(processName);
+                if (processes.Length == 0)
+                {
+                    // Process is not running
+                    Console.WriteLine($"{processName} is not running.");
+                }
+                else
+                {
+                    // Process is running
+                    Process process = processes[0];
+                    Console.WriteLine($"{processName} is running ({process.Id}).");
+
+                    // Check if the process has been running for longer than the threshold
+                    TimeSpan runningTime = DateTime.Now - process.StartTime;
+                    if (runningTime.TotalSeconds > threshold)
+                    {
+                        // Process has been running for longer than the threshold, kill it
+                        Console.WriteLine($"{processName} has been running for {runningTime.TotalSeconds} seconds which is more than (threshold: {threshold} seconds). Hence killing process...");
+                        process.Kill();
+                    }
+                }
+
+                // Wait for frequency input before checking again
+                System.Threading.Thread.Sleep(frequency);
+                
+                // Wait for a key press to stop the process
+                Console.WriteLine("Press any key to stop the utility...");
+                Console.ReadKey();
+
+                // Stop the process
+                process.Kill();
+
+                Console.WriteLine("Utility stopped.");
+            }
+        }
+    }
+}
